@@ -59,8 +59,8 @@
             animation: scan 3s linear infinite;
         }
         .hidden {
-            display: none;
-            visibility: hidden;
+            display: none !important;
+            visibility: hidden !important;
         }
     </style>
 </head>
@@ -92,9 +92,9 @@
                     <span>Sisa Kuota: <span id="globalNeuronText" class="text-white font-mono">10,000</span> <span class="text-slate-500 font-normal">Neurons</span></span>
                 </div>
                 
-                <span class="sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                    kimi-code Active
+                <span id="activeModelBadge" class="sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+                    <span id="activeModelDot" class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span id="activeModelText">kimi-code Active</span>
                 </span>
             </div>
         </div>
@@ -123,7 +123,7 @@
                     <div>
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-2">
-                                <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                                <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400" id="terminalHeaderIcon">
                                     <i data-lucide="terminal" class="w-5 h-5"></i>
                                 </div>
                                 <h2 class="text-lg font-bold text-white">Redesign Terminal</h2>
@@ -135,7 +135,8 @@
 
                         <!-- Form Input Fields -->
                         <div class="space-y-4">
-                            <div class="hidden">
+                            <!-- Input Endpoint API Cloudflare Worker -->
+                            <div>
                                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Endpoint API Cloudflare Worker</label>
                                 <input type="url" id="apiEndpointInput" required value="https://ai-redesign.harisudahmalam.workers.dev" 
                                     class="w-full glass-input rounded-xl px-4 py-3 text-sm text-slate-300 font-mono focus:outline-none">
@@ -158,10 +159,10 @@
                             <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Metrik & Status Sistem</h3>
                             
                             <!-- Detailed Live Neuron Meter Widget -->
-                            <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 space-y-3">
+                            <div id="terminalNeuronWidget" class="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 space-y-3 transition-colors duration-350">
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="text-slate-400 flex items-center gap-1.5">
-                                        <i data-lucide="zap" class="w-3.5 h-3.5 text-indigo-400"></i> Konsumsi Neuron Harian
+                                        <i data-lucide="zap" class="w-3.5 h-3.5 text-indigo-400" id="meterZapIcon"></i> Konsumsi Neuron Harian
                                     </span>
                                     <span id="terminalNeuronPercent" class="font-bold font-mono text-indigo-400">0%</span>
                                 </div>
@@ -297,7 +298,7 @@
                             <div class="w-full max-w-xs mt-6 bg-slate-900/90 rounded-2xl p-5 border border-rose-500/25 text-left">
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Konsumsi Cloudflare AI</span>
-                                    <span class="text-xs font-bold text-rose-400">10,000 / 10,000 (100%)</span>
+                                    <span class="text-xs font-bold text-rose-400" id="lockoutProgressText">10,000 / 10,000 (100%)</span>
                                 </div>
                                 <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
                                     <div class="bg-gradient-to-r from-rose-500 to-pink-500 h-full rounded-full w-full"></div>
@@ -311,7 +312,7 @@
                                     </div>
                                     <div>
                                         <span class="text-slate-500 block font-semibold uppercase">Status Saat Ini</span>
-                                        <span class="text-rose-400 font-bold flex items-center gap-1 mt-0.5">
+                                        <span class="text-rose-400 font-bold flex items-center gap-1 mt-0.5" id="lockoutStatusText">
                                             <i data-lucide="lock" class="w-3.5 h-3.5"></i> Terkunci (429)
                                         </span>
                                     </div>
@@ -319,8 +320,8 @@
                             </div>
 
                             <div class="mt-6 flex flex-col sm:flex-row gap-3 w-full max-w-xs justify-center">
-                                <button onclick="fetchNeuronUsage(true)" class="flex-1 bg-slate-900 hover:bg-slate-850 text-slate-200 border border-slate-800 font-semibold text-xs px-4 py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
-                                    <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Cek Status Lagi
+                                <button type="button" id="btnCheckStatus" onclick="fetchNeuronUsage(true)" class="flex-1 bg-slate-900 hover:bg-slate-850 text-slate-200 border border-slate-800 font-semibold text-xs px-4 py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                                    <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> <span>Cek Status Lagi</span>
                                 </button>
                                 <a href="https://developers.cloudflare.com/workers-ai/platform/pricing/" target="_blank" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs px-4 py-3 rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 shadow-lg shadow-rose-500/20">
                                     Skema Cloudflare AI <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
@@ -465,7 +466,7 @@
 
     <!-- Logika Interaktivitas Frontend (JavaScript murni tanpa error) -->
     <script>
-        // Inisialisasi ikon Lucide
+        // Inisialisasi ikon Lucide awal
         lucide.createIcons();
 
         // Elemen-elemen DOM
@@ -495,6 +496,17 @@
         const terminalNeuronPercent = document.getElementById("terminalNeuronPercent");
         const terminalNeuronBar = document.getElementById("terminalNeuronBar");
         const terminalNeuronUsed = document.getElementById("terminalNeuronUsed");
+        const terminalNeuronWidget = document.getElementById("terminalNeuronWidget");
+        const meterZapIcon = document.getElementById("meterZapIcon");
+        const terminalHeaderIcon = document.getElementById("terminalHeaderIcon");
+        const activeModelBadge = document.getElementById("activeModelBadge");
+        const activeModelDot = document.getElementById("activeModelDot");
+        const activeModelText = document.getElementById("activeModelText");
+        
+        // Elemen LOCKOUT internal
+        const lockoutProgressText = document.getElementById("lockoutProgressText");
+        const lockoutStatusText = document.getElementById("lockoutStatusText");
+        const btnCheckStatus = document.getElementById("btnCheckStatus");
 
         // Elemen Kalibrasi Manual
         const calibrationFormContainer = document.getElementById("calibrationFormContainer");
@@ -530,7 +542,8 @@
             try {
                 const res = await fetch(`${apiBaseUrl}/api/calibrate?value=${parsed}`, { method: "GET" });
                 if (res.ok) {
-                    updateNeuronUI(parsed);
+                    const data = await res.json();
+                    updateNeuronUI(data.currentUsage || parsed);
                     calibrationFormContainer.classList.add("hidden");
                     calibrateValueInput.value = "";
                 }
@@ -542,75 +555,115 @@
             }
         }
 
+        // --- DIPERBAIKI: Mengambil data sisa kuota dari rute /api/usage ---
         async function fetchNeuronUsage(isManual = false) {
             const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+            
+            // Logika efek putaran animasi tombol
+            let syncBtnIcon = null;
             if (isManual) {
-                const syncBtnIcon = document.querySelector("#btnSync i") || document.querySelector("#screenLockout i[data-lucide='rotate-cw']");
+                syncBtnIcon = document.querySelector("#btnSync i");
                 if (syncBtnIcon) syncBtnIcon.classList.add("animate-spin");
+                
+                const checkStatusIcon = document.querySelector("#btnCheckStatus i");
+                if (checkStatusIcon) checkStatusIcon.classList.add("animate-spin");
             }
 
             try {
-                const res = await fetch(apiBaseUrl, { method: "GET" });
-                const neuronHeader = res.headers.get("X-Neuron-Total-Usage") || res.headers.get("x-neuron-total-usage");
-                
-                if (neuronHeader) {
-                    updateNeuronUI(parseFloat(neuronHeader));
+                // Memanggil endpoint rute baru yang efisien
+                const res = await fetch(`${apiBaseUrl}/api/usage`, { method: "GET" });
+                if (res.ok) {
+                    const data = await res.json();
+                    updateNeuronUI(data.currentUsage, data.limit);
                 } else {
-                    const text = await res.text();
-                    const matchPattern = text.match(/neurons:(\d+)/i) || text.match(/neurons:(\d+\.\d+)/i);
-                    if (matchPattern) {
-                        const val = parseFloat(matchPattern[1]);
-                        updateNeuronUI(val);
-                    } else {
-                        updateNeuronUI(0); // fallback default
+                    // Fallback jika API usage belum dideploy di backend lama
+                    const neuronHeader = res.headers.get("X-Neuron-Total-Usage");
+                    if (neuronHeader) {
+                        updateNeuronUI(parseFloat(neuronHeader), NEURON_DAILY_LIMIT);
                     }
                 }
             } catch (err) {
-                console.warn("Koneksi gagal saat mengambil status Neuron. Menampilkan mode cache.", err);
-                updateNeuronUI(0);
+                console.warn("Koneksi gagal saat mengambil status Neuron dari endpoint.", err);
             } finally {
-                const syncBtnIcon = document.querySelector("#btnSync i");
+                // Menghentikan animasi putar icon
                 if (syncBtnIcon) syncBtnIcon.classList.remove("animate-spin");
+                const checkStatusIcon = document.querySelector("#btnCheckStatus i");
+                if (checkStatusIcon) checkStatusIcon.classList.remove("animate-spin");
             }
         }
 
-        function updateNeuronUI(usedNeurons) {
-            const totalUsed = Math.min(Math.max(0, usedNeurons), NEURON_DAILY_LIMIT);
-            const remaining = NEURON_DAILY_LIMIT - totalUsed;
-            const percentUsed = (totalUsed / NEURON_DAILY_LIMIT) * 100;
+        // --- DIPERBAIKI: Sinkronisasi Terpusat UI Hijau/Merah & Kunci Kuota ---
+        function updateNeuronUI(usedNeurons, maxLimit = NEURON_DAILY_LIMIT) {
+            const totalUsed = Math.min(Math.max(0, usedNeurons), maxLimit);
+            const remaining = maxLimit - totalUsed;
+            const percentUsed = (totalUsed / maxLimit) * 100;
 
-            // Update UI Global
+            // Update UI Global Badge di Header
             globalNeuronText.innerText = Math.round(remaining).toLocaleString("id-ID");
             
-            if (remaining < 2000) {
-                globalNeuronIcon.className = "w-4 h-4 text-rose-500 animate-pulse";
-            } else if (remaining < 5000) {
-                globalNeuronIcon.className = "w-4 h-4 text-amber-500 animate-pulse";
-            } else {
-                globalNeuronIcon.className = "w-4 h-4 text-emerald-400";
-            }
-
-            // Update UI Terminal Detail
+            // Update widget detail terminal
             terminalNeuronPercent.innerText = Math.round(percentUsed) + "%";
             terminalNeuronBar.style.width = percentUsed + "%";
             terminalNeuronUsed.innerText = Math.round(totalUsed).toLocaleString("id-ID") + " Neurons Terpakai";
 
-            if (percentUsed >= 90) {
-                terminalNeuronBar.className = "bg-gradient-to-r from-rose-500 to-pink-500 h-full rounded-full transition-all duration-700";
+            // Kondisi 1: KUOTA HABIS (LOCKOUT)
+            if (totalUsed >= maxLimit) {
+                // Sinyal Bahaya (Merah total)
+                globalNeuronIcon.className = "w-4 h-4 text-rose-500 animate-pulse";
                 terminalNeuronPercent.className = "font-bold font-mono text-rose-400";
-            } else if (percentUsed >= 60) {
-                terminalNeuronBar.className = "bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-700";
+                
+                terminalNeuronBar.className = "bg-gradient-to-r from-rose-500 to-pink-500 h-full rounded-full transition-all duration-700";
+                terminalNeuronWidget.className = "bg-rose-950/20 border border-rose-900/30 rounded-2xl p-4 space-y-3 transition-colors duration-350 shadow-glow-rose";
+                meterZapIcon.className = "w-3.5 h-3.5 text-rose-500 animate-pulse";
+                terminalHeaderIcon.className = "p-2 rounded-lg bg-rose-500/10 text-rose-400";
+                
+                activeModelBadge.className = "sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-semibold";
+                activeModelDot.className = "w-2 h-2 bg-rose-500 rounded-full animate-pulse";
+                activeModelText.innerText = "System Locked (429)";
+
+                // Locker status text pada warning page
+                lockoutProgressText.innerText = `${Math.round(totalUsed).toLocaleString("id-ID")} / ${maxLimit.toLocaleString("id-ID")} (100%)`;
+                lockoutStatusText.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5"></i> Terkunci (429)`;
+                
+                showLockoutScreen();
+            } 
+            // Kondisi 2: Kuota Kritis (Kuning / Oranye)
+            else if (percentUsed >= 60) {
+                globalNeuronIcon.className = "w-4 h-4 text-amber-500 animate-pulse";
                 terminalNeuronPercent.className = "font-bold font-mono text-amber-400";
-            } else {
-                terminalNeuronBar.className = "bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400 h-full rounded-full transition-all duration-700";
+                
+                terminalNeuronBar.className = "bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-700";
+                terminalNeuronWidget.className = "bg-slate-950/40 border border-amber-900/20 rounded-2xl p-4 space-y-3 transition-colors duration-350";
+                meterZapIcon.className = "w-3.5 h-3.5 text-amber-500";
+                terminalHeaderIcon.className = "p-2 rounded-lg bg-indigo-500/10 text-indigo-400";
+                
+                activeModelBadge.className = "sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold";
+                activeModelDot.className = "w-2 h-2 bg-emerald-500 rounded-full animate-pulse";
+                activeModelText.innerText = "kimi-code Active";
+                
+                hideLockoutScreen();
+            } 
+            // Kondisi 3: Kuota Sehat (Normal Hijau/Indigo)
+            else {
+                globalNeuronIcon.className = "w-4 h-4 text-emerald-400";
                 terminalNeuronPercent.className = "font-bold font-mono text-indigo-400";
+                
+                terminalNeuronBar.className = "bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400 h-full rounded-full transition-all duration-700";
+                terminalNeuronWidget.className = "bg-slate-950/40 border border-slate-900 rounded-2xl p-4 space-y-3 transition-colors duration-350";
+                meterZapIcon.className = "w-3.5 h-3.5 text-indigo-400";
+                terminalHeaderIcon.className = "p-2 rounded-lg bg-indigo-500/10 text-indigo-400";
+                
+                activeModelBadge.className = "sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold";
+                activeModelDot.className = "w-2 h-2 bg-emerald-500 rounded-full animate-pulse";
+                activeModelText.innerText = "kimi-code Active";
+                
+                hideLockoutScreen();
             }
 
-            if (totalUsed >= NEURON_DAILY_LIMIT) {
-                showLockoutScreen();
-            }
+            lucide.createIcons();
         }
 
+        // Aktifkan Tampilan Layar Lockout
         function showLockoutScreen() {
             screenPlaceholder.classList.add("hidden");
             screenLoading.classList.add("hidden");
@@ -620,10 +673,24 @@
             screenLockout.classList.remove("hidden");
             
             btnSubmit.disabled = true;
-            btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+            btnSubmit.classList.add("opacity-40", "cursor-not-allowed", "from-slate-800", "to-slate-900");
+            btnSubmit.classList.remove("from-indigo-600", "to-violet-600", "hover:from-indigo-500", "hover:to-violet-500");
         }
 
-        // Ambil status awal saat web diload
+        // --- BARU: Sembunyikan Layar Lockout & Pulihkan Tombol Submit ---
+        function hideLockoutScreen() {
+            // Hanya hapus screen lockout jika dia sedang terlihat
+            if (!screenLockout.classList.contains("hidden")) {
+                screenLockout.classList.add("hidden");
+                screenPlaceholder.classList.remove("hidden");
+            }
+            
+            btnSubmit.disabled = false;
+            btnSubmit.classList.remove("opacity-40", "cursor-not-allowed", "from-slate-800", "to-slate-900");
+            btnSubmit.classList.add("from-indigo-600", "to-violet-600", "hover:from-indigo-500", "hover:to-violet-500");
+        }
+
+        // Ambil status kuota awal setiap kali halaman dimuat pertama kali
         fetchNeuronUsage();
 
         const loadingSteps = [
@@ -670,6 +737,7 @@
             try {
                 const response = await fetch(apiBaseUrl + '/api/redesign?url=' + encodeURIComponent(targetUrl));
 
+                // Jika terdeteksi respon limit kuota habis
                 if (response.status === 429) {
                     animCompleted = true;
                     updateNeuronUI(NEURON_DAILY_LIMIT);
@@ -685,7 +753,8 @@
                     throw new Error(detailedMessage);
                 }
 
-                const newUsage = response.headers.get("X-Neuron-Total-Usage");
+                // Perbarui sisa kuota langsung dari Response Header atau pemicu ulang
+                const newUsage = response.headers.get("X-Neuron-Total-Usage") || response.headers.get("x-neuron-total-usage");
                 if (newUsage) {
                     updateNeuronUI(parseFloat(newUsage));
                 } else {
@@ -723,8 +792,12 @@
                 screenError.classList.remove("hidden");
                 errorMessageText.innerText = err.message || "Gagal menghubungi AI Server karena kendala jaringan.";
             } finally {
-                btnSubmit.disabled = false;
-                btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+                // Hanya aktifkan kembali tombol kirim jika kuota memang masih aman
+                const isLocked = (globalNeuronText.innerText === "0");
+                if (!isLocked) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+                }
             }
         });
 
