@@ -58,9 +58,6 @@
         .scan-line {
             animation: scan 3s linear infinite;
         }
-        .lockout-glow {
-            box-shadow: 0 0 40px -10px rgba(244, 63, 94, 0.4);
-        }
         .hidden {
             display: none;
             visibility: hidden;
@@ -131,7 +128,7 @@
                                 </div>
                                 <h2 class="text-lg font-bold text-white">Redesign Terminal</h2>
                             </div>
-                            <button type="button" id="btnSync" onclick="fetchNeuronUsage()" class="p-1.5 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition" title="Sinkronisasi Sisa Kuota">
+                            <button type="button" id="btnSync" onclick="fetchNeuronUsage(true)" class="p-1.5 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition" title="Sinkronisasi Sisa Kuota">
                                 <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -147,7 +144,7 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Target Website URL</label>
                                 <div class="relative">
-                                    <input type="url" id="urlInput" required placeholder="https://7897git.github.io" 
+                                    <input type="url" id="urlInput" required placeholder="https://daffadevhosting.github.io" 
                                         class="w-full glass-input rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 focus:outline-none">
                                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
                                         <i data-lucide="globe" class="w-4 h-4"></i>
@@ -160,7 +157,7 @@
                         <div class="mt-8 space-y-3 border-t border-slate-900 pt-6">
                             <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Metrik & Status Sistem</h3>
                             
-                            <!-- Detailed Live Neuron Meter Widget -->
+                            <!-- Detailed Live Neuron Meter Widget (Calibrate Enabled) -->
                             <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 space-y-3">
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="text-slate-400 flex items-center gap-1.5">
@@ -171,9 +168,28 @@
                                 <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-900">
                                     <div id="terminalNeuronBar" class="bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400 h-full rounded-full transition-all duration-700 w-0"></div>
                                 </div>
+                                
+                                <!-- Dynamic Calibration Input -->
                                 <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono">
-                                    <span id="terminalNeuronUsed">0 Neurons Terpakai</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span id="terminalNeuronUsed">0 Neurons Terpakai</span>
+                                        <button type="button" id="btnEditCalibration" onclick="toggleCalibrationInput()" class="text-slate-500 hover:text-white transition" title="Kalibrasi Manual ke Cloudflare Dashboard">
+                                            <i data-lucide="edit-2" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
                                     <span>Limit: 10,000</span>
+                                </div>
+
+                                <!-- Inline calibration form -->
+                                <div id="calibrationFormContainer" class="hidden flex items-center gap-1.5 pt-2 border-t border-slate-900/60">
+                                    <input type="number" id="calibrateValueInput" placeholder="Sesuai Dashboard (ex: 4170)" 
+                                        class="flex-grow bg-slate-950 border border-slate-800 text-[10px] font-mono rounded-lg px-2.5 py-1 text-indigo-300 focus:outline-none">
+                                    <button type="button" onclick="submitCalibration()" class="p-1 rounded bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition">
+                                        <i data-lucide="check" class="w-3 h-3"></i>
+                                    </button>
+                                    <button type="button" onclick="toggleCalibrationInput()" class="p-1 rounded bg-slate-900 text-slate-400 hover:text-white transition">
+                                        <i data-lucide="x" class="w-3 h-3"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -259,14 +275,13 @@
                             </div>
                             <h3 class="text-base font-bold text-white">Gagal Merancang Ulang</h3>
                             <p id="errorMessageText" class="text-xs text-slate-500 font-mono mt-2 text-center max-w-md leading-relaxed break-words"></p>
-                            <button onclick="resetWorkspace()" class="mt-6 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-xs font-semibold transition">
+                            <button onclick="resetWorkspace()" class="mt-6 px-4 py-2 bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 rounded-xl text-xs font-semibold transition">
                                 Kembali ke Terminal
                             </button>
                         </div>
 
-                        <!-- Layar 4: LOCKOUT KARENA NEURON HABIS (TEMPLATES ELEGAN) -->
+                        <!-- Layar 4: LOCKOUT KARENA NEURON HABIS -->
                         <div id="screenLockout" class="absolute inset-0 bg-slate-950/98 flex flex-col items-center justify-center p-8 z-40 hidden overflow-y-auto">
-                            <!-- Glowing Top Alert Strip -->
                             <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 animate-pulse"></div>
                             
                             <div class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-5 animate-pulse shadow-glow-rose">
@@ -290,7 +305,7 @@
                                 <div class="grid grid-cols-2 gap-4 mt-5 pt-3 border-t border-slate-800/60 text-[10px]">
                                     <div>
                                         <span class="text-slate-500 block font-semibold uppercase">Siklus Reset</span>
-                                        <span class="text-slate-200 font-medium flex items-center gap-1 mt-0.5">
+                                        <span class="text-slate-200 font-medium flex items-center gap-1.5 mt-0.5">
                                             <i data-lucide="clock" class="w-3.5 h-3.5 text-rose-400"></i> Setiap 24 Jam
                                         </span>
                                     </div>
@@ -481,6 +496,10 @@
         const terminalNeuronBar = document.getElementById("terminalNeuronBar");
         const terminalNeuronUsed = document.getElementById("terminalNeuronUsed");
 
+        // Elemen Kalibrasi Manual
+        const calibrationFormContainer = document.getElementById("calibrationFormContainer");
+        const calibrateValueInput = document.getElementById("calibrateValueInput");
+
         // Muat konfigurasi awal dari LocalStorage
         const DEFAULT_API_URL = "https://ai-redesign.harisudahmalam.workers.dev";
         apiEndpointInput.value = localStorage.getItem("saved_api_url") || DEFAULT_API_URL;
@@ -493,10 +512,36 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        /**
-         * Mengambil status penggunaan Neuron langsung dari backend API
-         * dengan membaca metadata / isi root page dari Worker
-         */
+        function toggleCalibrationInput() {
+            calibrationFormContainer.classList.toggle("hidden");
+            calibrateValueInput.focus();
+        }
+
+        async function submitCalibration() {
+            const rawVal = calibrateValueInput.value.trim();
+            if (!rawVal) return;
+            const parsed = parseFloat(rawVal);
+            if (isNaN(parsed)) return;
+
+            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+            const submitBtnIcon = document.querySelector("#calibrationFormContainer button i");
+            if (submitBtnIcon) submitBtnIcon.className = "w-3 h-3 animate-spin";
+
+            try {
+                const res = await fetch(`${apiBaseUrl}/api/calibrate?value=${parsed}`, { method: "GET" });
+                if (res.ok) {
+                    updateNeuronUI(parsed);
+                    calibrationFormContainer.classList.add("hidden");
+                    calibrateValueInput.value = "";
+                }
+            } catch (err) {
+                console.error("Gagal mengirim data kalibrasi ke Worker.", err);
+            } finally {
+                if (submitBtnIcon) submitBtnIcon.className = "w-3 h-3";
+                lucide.createIcons();
+            }
+        }
+
         async function fetchNeuronUsage(isManual = false) {
             const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
             if (isManual) {
@@ -505,39 +550,23 @@
             }
 
             try {
-                // Fetch landing page / status endpoint dari API
                 const res = await fetch(apiBaseUrl, { method: "GET" });
-                
-                // Cari header penggunaan neuron yang ditaruh oleh server jika ada
                 const neuronHeader = res.headers.get("X-Neuron-Total-Usage") || res.headers.get("x-neuron-total-usage");
                 
                 if (neuronHeader) {
                     updateNeuronUI(parseFloat(neuronHeader));
                 } else {
-                    // Jika tidak ada header khusus, parsing isi HTML untuk menemukan sisa neuron
                     const text = await res.text();
-                    
-                    // Pola pencarian regex untuk menemukan angka neuron terpakai atau sisa
-                    const matchPattern = text.match(/(\d+[,.]\d+|\d+)\s*(?:Neurons|Sisa Kuota)/i) || text.match(/neurons:(\d+)/i);
-                    
+                    const matchPattern = text.match(/neurons:(\d+)/i) || text.match(/neurons:(\d+\.\d+)/i);
                     if (matchPattern) {
-                        const parsedRaw = matchPattern[1].replace(/\./g, '').replace(',', '.');
-                        const numberVal = parseFloat(parsedRaw);
-                        
-                        // Deteksi jika angka tersebut sisa atau akumulasi
-                        if (text.includes("Sisa Kuota") || text.includes("Sisa")) {
-                            updateNeuronUI(NEURON_DAILY_LIMIT - numberVal);
-                        } else {
-                            updateNeuronUI(numberVal);
-                        }
+                        const val = parseFloat(matchPattern[1]);
+                        updateNeuronUI(val);
                     } else {
-                        // Fallback jika parser gagal mendeteksi
-                        updateNeuronUI(1350);
+                        updateNeuronUI(1613); // fallback default
                     }
                 }
             } catch (err) {
-                console.warn("Koneksi gagal saat mengambil status Neuron harian. Menampilkan cache / mode simulasi.", err);
-                // Failover default dummy jika server down / CORS block status
+                console.warn("Koneksi gagal saat mengambil status Neuron. Menampilkan mode cache.", err);
                 updateNeuronUI(0);
             } finally {
                 const syncBtnIcon = document.querySelector("#btnSync i");
@@ -545,11 +574,7 @@
             }
         }
 
-        /**
-         * Update elemen visual dashboard Neuron berdasarkan total neuron yang dipakai
-         */
         function updateNeuronUI(usedNeurons) {
-            // Jaga batas aman angka agar tidak negatif
             const totalUsed = Math.min(Math.max(0, usedNeurons), NEURON_DAILY_LIMIT);
             const remaining = NEURON_DAILY_LIMIT - totalUsed;
             const percentUsed = (totalUsed / NEURON_DAILY_LIMIT) * 100;
@@ -557,7 +582,6 @@
             // Update UI Global
             globalNeuronText.innerText = Math.round(remaining).toLocaleString("id-ID");
             
-            // Perubahan warna ikon baterai neuron
             if (remaining < 2000) {
                 globalNeuronIcon.className = "w-4 h-4 text-rose-500 animate-pulse";
             } else if (remaining < 5000) {
@@ -571,7 +595,6 @@
             terminalNeuronBar.style.width = percentUsed + "%";
             terminalNeuronUsed.innerText = Math.round(totalUsed).toLocaleString("id-ID") + " Neurons Terpakai";
 
-            // Atur styling bar jika hampir penuh
             if (percentUsed >= 90) {
                 terminalNeuronBar.className = "bg-gradient-to-r from-rose-500 to-pink-500 h-full rounded-full transition-all duration-700";
                 terminalNeuronPercent.className = "font-bold font-mono text-rose-400";
@@ -583,13 +606,11 @@
                 terminalNeuronPercent.className = "font-bold font-mono text-indigo-400";
             }
 
-            // Pemicu LOCKOUT Global jika kuota habis total
             if (totalUsed >= NEURON_DAILY_LIMIT) {
                 showLockoutScreen();
             }
         }
 
-        // Tampilkan lockout screen dengan visual cyberpunk merah premium
         function showLockoutScreen() {
             screenPlaceholder.classList.add("hidden");
             screenLoading.classList.add("hidden");
@@ -605,7 +626,6 @@
         // Ambil status awal saat web diload
         fetchNeuronUsage();
 
-        // Langkah Transisi Animasi Proses
         const loadingSteps = [
             { title: "Menghubungkan Engine...", log: "> Mengirim jabat tangan aman ke Cloudflare Edge...", progress: 20 },
             { title: "Membaca Target Halaman...", log: "> Vercel Client mengikis boilerplate DOM situs target...", progress: 45 },
@@ -613,7 +633,6 @@
             { title: "Merancang Desain Baru...", log: "> Model kimi-k2.7-code mulai melukis layout modern...", progress: 85 }
         ];
 
-        // Trigger Submit form desain ulang
         redesignForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -622,10 +641,8 @@
 
             if (!targetUrl) return;
 
-            // Simpan lokasi endpoint terakhir pengguna
             localStorage.setItem("saved_api_url", apiBaseUrl);
 
-            // Bersihkan Layar & Masuk ke Mode Loading
             screenPlaceholder.classList.add("hidden");
             previewFrame.classList.add("hidden");
             screenError.classList.add("hidden");
@@ -639,7 +656,6 @@
 
             let animCompleted = false;
             
-            // Menjalankan loading logs palsu untuk feedback transisi
             const runAnim = async () => {
                 for (let i = 0; i < loadingSteps.length; i++) {
                     if (animCompleted) break;
@@ -652,13 +668,11 @@
             runAnim();
 
             try {
-                // Kirim request fetch redesign
                 const response = await fetch(apiBaseUrl + '/api/redesign?url=' + encodeURIComponent(targetUrl));
 
-                // Deteksi khusus jika status 429 (Neuron Terlampaui)
                 if (response.status === 429) {
                     animCompleted = true;
-                    updateNeuronUI(NEURON_DAILY_LIMIT); // Paksa ke status penuh
+                    updateNeuronUI(NEURON_DAILY_LIMIT);
                     showLockoutScreen();
                     return;
                 }
@@ -668,12 +682,10 @@
                     throw new Error(errData.error || errData.message || ('Server mengembalikan status HTTP ' + response.status));
                 }
 
-                // Cek sisa kuota dari custom headers respon server
                 const newUsage = response.headers.get("X-Neuron-Total-Usage");
                 if (newUsage) {
                     updateNeuronUI(parseFloat(newUsage));
                 } else {
-                    // Update berkala pasca request
                     setTimeout(fetchNeuronUsage, 1000);
                 }
 
@@ -689,17 +701,15 @@
                 progressBar.style.width = "100%";
                 await delay(600);
 
-                // Masukkan HTML ke Iframe secara dinamis
                 const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
                 doc.open();
                 doc.write(currentGeneratedHTML);
                 doc.close();
 
-                // Ubah nama URL di address label preview
                 previewUrlLabel.innerText = targetUrl.replace(/^https?:\/\//i, '');
 
                 screenLoading.classList.add("hidden");
-                previewFrame.classList.remove("hidden");
+                previewFrame.contentNavigator || previewFrame.classList.remove("hidden");
 
                 btnCopy.disabled = false;
                 btnOpen.disabled = false;
@@ -715,14 +725,12 @@
             }
         });
 
-        // Kembalikan area kerja ke kondisi awal
         function resetWorkspace() {
             screenError.classList.add("hidden");
             screenLockout.classList.add("hidden");
             screenPlaceholder.classList.remove("hidden");
         }
 
-        // Salin output kode HTML
         btnCopy.addEventListener("click", () => {
             if (!currentGeneratedHTML) return;
             
@@ -743,7 +751,6 @@
             }, 2000);
         });
 
-        // Buka live preview di tab baru browser
         btnOpen.addEventListener("click", () => {
             if (!currentGeneratedHTML) return;
             const newWindow = window.open();
