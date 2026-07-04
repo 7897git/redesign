@@ -157,7 +157,7 @@
                         <div class="mt-8 space-y-3 border-t border-slate-900 pt-6">
                             <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Metrik & Status Sistem</h3>
                             
-                            <!-- Detailed Live Neuron Meter Widget (Calibrate Enabled) -->
+                            <!-- Detailed Live Neuron Meter Widget -->
                             <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 space-y-3">
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="text-slate-400 flex items-center gap-1.5">
@@ -274,7 +274,7 @@
                                 <i data-lucide="alert-triangle" class="w-7 h-7"></i>
                             </div>
                             <h3 class="text-base font-bold text-white">Gagal Merancang Ulang</h3>
-                            <p id="errorMessageText" class="text-xs text-slate-500 font-mono mt-2 text-center max-w-md leading-relaxed break-words"></p>
+                            <p id="errorMessageText" class="text-xs text-slate-500 font-mono mt-2 text-center max-w-md leading-relaxed break-all bg-slate-900 p-4 border border-slate-800 rounded-xl text-indigo-300"></p>
                             <button onclick="resetWorkspace()" class="mt-6 px-4 py-2 bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 rounded-xl text-xs font-semibold transition">
                                 Kembali ke Terminal
                             </button>
@@ -562,7 +562,7 @@
                         const val = parseFloat(matchPattern[1]);
                         updateNeuronUI(val);
                     } else {
-                        updateNeuronUI(1613); // fallback default
+                        updateNeuronUI(0); // fallback default
                     }
                 }
             } catch (err) {
@@ -679,7 +679,10 @@
 
                 if (!response.ok) {
                     const errData = await response.json().catch(function() { return {}; });
-                    throw new Error(errData.error || errData.message || ('Server mengembalikan status HTTP ' + response.status));
+                    const detailedMessage = errData.message 
+                        ? `${errData.error} (Detail: ${errData.message})`
+                        : (errData.error || ('Server mengembalikan status HTTP ' + response.status));
+                    throw new Error(detailedMessage);
                 }
 
                 const newUsage = response.headers.get("X-Neuron-Total-Usage");
@@ -709,7 +712,7 @@
                 previewUrlLabel.innerText = targetUrl.replace(/^https?:\/\//i, '');
 
                 screenLoading.classList.add("hidden");
-                previewFrame.contentNavigator || previewFrame.classList.remove("hidden");
+                previewFrame.classList.remove("hidden");
 
                 btnCopy.disabled = false;
                 btnOpen.disabled = false;
